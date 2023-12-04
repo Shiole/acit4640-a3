@@ -1,156 +1,44 @@
-resource "aws_security_group" "a03_be_sg" {
-  name        = "a03_be_sg"
-  description = "Allow SSH access to EC2 from home and BCIT and all traffic from pub_sg"
-  vpc_id      = var.a03_vpc.id
-}
-
-resource "aws_security_group" "a03_web_sg" {
-  name        = "a03_web_sg"
-  description = "Allow HTTP and SSH access to EC2 from home and BCIT and all traffic from priv_sg"
-  vpc_id      = var.a03_vpc.id
-}
-
-resource "aws_security_group" "a03_db_sg" {
-  name        = "a03_db_sg"
-  description = "Allow HTTP and SSH access to EC2 from home and BCIT and all traffic from priv_sg"
-  vpc_id      = var.a03_vpc.id
-}
-
-# BE SG egress/ingress rules
-resource "aws_vpc_security_group_egress_rule" "be_egress_rule" {
-  security_group_id = aws_security_group.a03_be_sg.id
-  ip_protocol       = -1
-  cidr_ipv4         = "0.0.0.0/0"
+resource "aws_security_group" "sg_self" {
+  name        = var.sg_name
+  description = var.sg_description
+  vpc_id      = var.vpc_id
   tags = {
-    Name    = "be_egress_rule"
+    Name    = var.sg_name
     Project = var.project_name
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "be_ssh_home_rule" {
-  security_group_id = aws_security_group.a03_be_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = var.home_net
+resource "aws_vpc_security_group_ingress_rule" "ingress" {
+  for_each = { # loop over string literal set of rules
+    # build set that holds list of strings 
+    for index, rule in var.ingress_rules : # loop over list of rules
+    # build string literal of map/dictionary of rule objects
+    rule.rule_name => rule # sets key (rule.name) and value (rule)
+  }
+
+  description       = each.value.description
+  ip_protocol       = each.value.ip_protocol
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  cidr_ipv4         = each.value.cidr_ipv4
+  security_group_id = aws_security_group.sg_self.id
   tags = {
-    Name    = "be_ssh_home_rule"
+    Name    = each.value.rule_name
     Project = var.project_name
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "be_ssh_bcit_rule" {
-  security_group_id = aws_security_group.a03_be_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = var.bcit_net
-  tags = {
-    Name    = "be_ssh_bcit_rule"
-    Project = var.project_name
+resource "aws_vpc_security_group_egress_rule" "egress_rule" {
+  for_each = {
+    for index, rule in var.egress_rules :
+    rule.rule_name => rule
   }
-}
 
-resource "aws_vpc_security_group_ingress_rule" "be_all_pub_sg_rule" {
-  security_group_id = aws_security_group.a03_be_sg.id
-  ip_protocol       = -1
-  cidr_ipv4         = var.web_subnet_cidr
+  security_group_id = aws_security_group.sg_self.id
+  ip_protocol       = each.value.ip_protocol
+  cidr_ipv4         = each.value.cidr_ipv4
   tags = {
-    Name    = "be_all_web_sg_rule"
-    Project = var.project_name
-  }
-}
-
-# Public SG egress/ingress rules
-resource "aws_vpc_security_group_egress_rule" "web_egress_rule" {
-  security_group_id = aws_security_group.a03_web_sg.id
-  ip_protocol       = -1
-  cidr_ipv4         = "0.0.0.0/0"
-  tags = {
-    Name    = "web_egress_rule"
-    Project = var.project_name
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "web_ssh_home_rule" {
-  security_group_id = aws_security_group.a03_web_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = var.home_net
-  tags = {
-    Name    = "web_ssh_home_rule"
-    Project = var.project_name
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "web_ssh_bcit_rule" {
-  security_group_id = aws_security_group.a03_web_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = var.bcit_net
-  tags = {
-    Name    = "web_ssh_bcit_rule"
-    Project = var.project_name
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "web_http_rule" {
-  security_group_id = aws_security_group.a03_web_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 80
-  to_port           = 80
-  cidr_ipv4         = "0.0.0.0/0"
-  tags = {
-    Name    = "web_http_rule"
-    Project = var.project_name
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "web_https_rule" {
-  security_group_id = aws_security_group.a03_web_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 443
-  to_port           = 443
-  cidr_ipv4         = "0.0.0.0/0"
-  tags = {
-    Name    = "web_https_rule"
-    Project = var.project_name
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "all_be_sg_rule" {
-  security_group_id = aws_security_group.a03_be_sg.id
-  ip_protocol       = -1
-  cidr_ipv4         = var.be_subnet_cidr
-  tags = {
-    Name    = "web_all_be_sg_rule"
-    Project = var.project_name
-  }
-}
-
-# DB SG egress/ingress rules
-resource "aws_vpc_security_group_egress_rule" "db_egress_rule" {
-  security_group_id = aws_security_group.a03_db_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 3306
-  to_port           = 3306
-  cidr_ipv4         = var.be_subnet_cidr
-  tags = {
-    Name    = "db_egress_sg_rule"
-    Project = var.project_name
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "db_ingress_rule" {
-  security_group_id = aws_security_group.a03_db_sg.id
-  ip_protocol       = "tcp"
-  from_port         = 3306
-  to_port           = 3306
-  cidr_ipv4         = var.be_subnet_cidr
-  tags = {
-    Name    = "db_ingress_sg_rule"
+    Name    = each.value.rule_name
     Project = var.project_name
   }
 }
