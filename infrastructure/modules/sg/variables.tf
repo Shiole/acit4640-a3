@@ -1,13 +1,3 @@
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-}
-
-variable "aws_az" {
-  description = "AWS AZ"
-  type        = string
-}
-
 variable "project_name" {
   description = "Project name"
   type        = string
@@ -36,19 +26,4 @@ variable "ingress_rules" {
 variable "egress_rules" {
   description = "SG egress rules list"
   type        = list(map(string))
-}
-
-variable "default_route" {
-  description = "Default route"
-  type        = string
-}
-
-variable "home_net" {
-  description = "Home network"
-  type        = string
-}
-
-variable "bcit_net" {
-  description = "BCIT network"
-  type        = string
 }
