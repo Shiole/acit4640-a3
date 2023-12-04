@@ -39,6 +39,8 @@ module "be_sg" {
     {
       description = "be allow all vpc"
       ip_protocol = -1
+      from_port   = 0
+      to_port     = 0
       cidr_ipv4   = var.vpc_cidr
       rule_name   = "be_allow_all_vpc"
     }
@@ -97,6 +99,8 @@ module "web_sg" {
     {
       description = "web allow be sg"
       ip_protocol = -1
+      from_port   = 0
+      to_port     = 0
       cidr_ipv4   = var.be_subnet_cidr
       rule_name   = "web_all_web_sg"
     }
