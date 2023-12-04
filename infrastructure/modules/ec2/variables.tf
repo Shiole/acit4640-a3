@@ -37,7 +37,3 @@ variable "ssh_key_name" {
   description = "AWS SSH key name"
   type        = string
 }
-
-provider "aws" {
-  region = var.aws_region
-}
