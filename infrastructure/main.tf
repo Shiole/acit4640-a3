@@ -1,5 +1,5 @@
 module "vpc" {
-  source          = "./infrastructure/modules/ec2"
+  source          = "./modules/vpc"
   project_name    = var.project_name
   vpc_cidr        = var.vpc_cidr
   be_subnet_cidr  = var.be_subnet_cidr
@@ -8,12 +8,13 @@ module "vpc" {
   db2_subnet_cidr = var.db2_subnet_cidr
   default_route   = "0.0.0.0/0"
   home_net        = var.home_net
+  bcit_net        = var.bcit_net
   aws_region      = var.aws_region
   aws_az          = var.aws_az
 }
 
 module "be_sg" {
-  source         = "./infrastructure/modules/sg"
+  source         = "./modules/sg"
   project_name   = var.project_name
   sg_name        = "be_sg"
   sg_description = "Allow ssh & all traffic from vpc"
@@ -44,20 +45,22 @@ module "be_sg" {
   ]
   egress_rules = [
     {
-      description = "allow all egress traffic"
+      description = "be allow all egress traffic"
       ip_protocol = -1
       from_port   = 0
       to_port     = 0
       cidr_ipv4   = "0.0.0.0/0"
-      rule_name   = "allow_all_egress"
+      rule_name   = "be_allow_all_egress"
     }
   ]
 }
 
 module "web_sg" {
-  source       = "./infrastructure/modules/sg"
-  project_name = var.project_name
-  vpc_id       = module.vpc.vpc_id
+  source         = "./modules/sg"
+  project_name   = var.project_name
+  sg_name        = "web_sg"
+  sg_description = "Allow ssh & http/https traffic"
+  vpc_id         = module.vpc.vpc_id
   ingress_rules = [
     {
       description = "web ssh from home"
@@ -94,26 +97,27 @@ module "web_sg" {
     {
       description = "web allow be sg"
       ip_protocol = -1
-      cidr_ipv4   = module.be_subnet_cidr
+      cidr_ipv4   = var.be_subnet_cidr
       rule_name   = "web_all_web_sg"
     }
   ]
   egress_rules = [
     {
-      description = "allow all egress traffic"
+      description = "web allow all egress traffic"
       ip_protocol = "-1"
       from_port   = 0
       to_port     = 0
       cidr_ipv4   = "0.0.0.0/0"
-      rule_name   = "allow_all_egress"
+      rule_name   = "web_allow_all_egress"
     }
   ]
 }
 
 module "db_sg" {
-  source         = "./infrastructure/modules/sg"
-  sg_description = "Allows ssh, web, and port 5000 ingress access and all egress"
+  source         = "./modules/sg"
   project_name   = var.project_name
+  sg_name        = "db_sg"
+  sg_description = "Allows port 3306 egress & egress"
   vpc_id         = module.vpc.vpc_id
   ingress_rules = [
     {
@@ -138,23 +142,25 @@ module "db_sg" {
 }
 
 module "be_ec2" {
-  source            = "./infrastructure/modules/ec2"
+  source            = "./modules/ec2"
   project_name      = var.project_name
   tag_name          = "a03_be"
   aws_region        = var.aws_region
   ami_id            = var.ami_id
+  instance_type     = var.instance_type
   subnet_id         = module.vpc.be_subnet_id
-  security_group_id = module.sg.be_sg_id
+  security_group_id = module.be_sg.sg_id
   ssh_key_name      = var.ssh_key_name
 }
 
 module "web_ec2" {
-  source            = "./infrastructure/modules/ec2"
+  source            = "./modules/ec2"
   project_name      = var.project_name
   tag_name          = "a03_web"
   aws_region        = var.aws_region
   ami_id            = var.ami_id
+  instance_type     = var.instance_type
   subnet_id         = module.vpc.web_subnet_id
-  security_group_id = module.sg.web_sg_id
+  security_group_id = module.web_sg.sg_id
   ssh_key_name      = var.ssh_key_name
 }
