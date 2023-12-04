@@ -38,9 +38,9 @@ module "be_sg" {
     },
     {
       description = "be allow all vpc"
-      ip_protocol = -1
-      from_port   = 0
-      to_port     = 0
+      ip_protocol = "-1"
+      from_port   = -1
+      to_port     = -1
       cidr_ipv4   = var.vpc_cidr
       rule_name   = "be_allow_all_vpc"
     }
@@ -48,7 +48,7 @@ module "be_sg" {
   egress_rules = [
     {
       description = "be allow all egress traffic"
-      ip_protocol = -1
+      ip_protocol = "-1"
       from_port   = 0
       to_port     = 0
       cidr_ipv4   = "0.0.0.0/0"
@@ -98,9 +98,9 @@ module "web_sg" {
     },
     {
       description = "web allow be sg"
-      ip_protocol = -1
-      from_port   = 0
-      to_port     = 0
+      ip_protocol = "-1"
+      from_port   = -1
+      to_port     = -1
       cidr_ipv4   = var.be_subnet_cidr
       rule_name   = "web_all_web_sg"
     }
@@ -151,7 +151,7 @@ module "be_ec2" {
   tag_name          = "a03_be"
   aws_region        = var.aws_region
   ami_id            = var.ami_id
-  instance_type     = var.instance_type
+  instance_type     = "t2.micro"
   subnet_id         = module.vpc.be_subnet_id
   security_group_id = module.be_sg.sg_id
   ssh_key_name      = var.ssh_key_name
@@ -163,7 +163,7 @@ module "web_ec2" {
   tag_name          = "a03_web"
   aws_region        = var.aws_region
   ami_id            = var.ami_id
-  instance_type     = var.instance_type
+  instance_type     = "t2.micro"
   subnet_id         = module.vpc.web_subnet_id
   security_group_id = module.web_sg.sg_id
   ssh_key_name      = var.ssh_key_name

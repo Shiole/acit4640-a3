@@ -17,9 +17,9 @@ resource "aws_vpc_security_group_ingress_rule" "ingress" {
   }
 
   description       = each.value.description
-  ip_protocol       = each.value.ip_protocol
   from_port         = each.value.from_port
   to_port           = each.value.to_port
+  ip_protocol       = each.value.ip_protocol
   cidr_ipv4         = each.value.cidr_ipv4
   security_group_id = aws_security_group.sg_self.id
   tags = {

@@ -32,7 +32,7 @@ resource "aws_subnet" "a03_be_subnet" {
   availability_zone       = var.aws_az
   map_public_ip_on_launch = true
   tags = {
-    Name    = "a03_priv_subnet"
+    Name    = "a03_be_subnet"
     Project = var.project_name
   }
 }
@@ -43,7 +43,7 @@ resource "aws_subnet" "a03_web_subnet" {
   availability_zone       = var.aws_az
   map_public_ip_on_launch = true
   tags = {
-    Name    = "a03_pub_subnet"
+    Name    = "a03_web_subnet"
     Project = var.project_name
   }
 }
