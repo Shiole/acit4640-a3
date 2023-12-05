@@ -11,6 +11,7 @@ module "vpc" {
   bcit_net        = var.bcit_net
   aws_region      = var.aws_region
   aws_az          = var.aws_az
+  aws_az2         = var.aws_az2
 }
 
 module "be_sg" {
@@ -174,8 +175,7 @@ module "rds" {
   project_name = var.project_name
   subnet_tag   = "a03_db_subnet"
   rds_tag      = "a03_rds"
-  vpc_id       = var.vpc_cidr
-  db_sg        = [module.sg.db_sg.sg_id]
+  db_sg        = [module.db_sg.sg_id]
   subnets      = [module.vpc.db1_subnet_id, module.vpc.db2_subnet_id]
 }
 
@@ -184,44 +184,44 @@ resource "local_file" "inventory_file" {
   content = <<EOF
 web:
   hosts:
-    ${module.web.ec2_instance_public_dns}:
+    ${module.web_ec2.ec2_pub_dns}:
 
 backend:
   hosts:
-    ${module.be.ec2_instance_public_dns}:
+    ${module.be_ec2.ec2_pub_dns}:
 EOF
 
-  filename = "../../service/inventory/webservers.yml"
+  filename = "../service/inventory/webservers.yml"
 
 }
 
 resource "local_file" "group_vars_file" {
 
   content = <<EOF
-web_pub_ip: ${module.web.ec2_instance_public_ip}
-backend_pub_ip: ${module.be.ec2_instance_public_ip}
+web_pub_ip: ${module.web_ec2.ec2_pub_ip}
+backend_pub_ip: ${module.be_ec2.ec2_pub_ip}
 
-web_pub_dns: ${module.web.ec2_instance_public_dns}
-backend_pub_dns: ${module.be.ec2_instance_public_dns}
+web_pub_dns: ${module.web_ec2.ec2_pub_dns}
+backend_pub_dns: ${module.be_ec2.ec2_pub_dns}
 
-web_priv_ip: ${module.web.ec2_instance_private_ip}
-backend_priv_ip: ${module.be.ec2_instance_private_ip}
+web_priv_ip: ${module.web_ec2.ec2_priv_ip}
+backend_priv_ip: ${module.be_ec2.ec2_priv_ip}
 
-database_endpoint: ${module.rds.host_address}
+database_endpoint: ${module.rds.rds_address}
 EOF
 
-  filename = "../../service/group_vars/webservers.yml"
+  filename = "../service/group_vars/webservers.yml"
 
 }
 
 resource "local_file" "instances" {
 
   content = <<EOF
-web_id="${module.web.ec2_instance_id}"
-backend_id="${module.be.ec2_instance_id}"
-web_dns="${module.web.ec2_instance_public_dns}"
+web_id="${module.web_ec2.ec2_id}"
+backend_id="${module.be_ec2.ec2_id}"
+web_dns="${module.web_ec2.ec2_pub_dns}"
 EOF
 
-  filename = "../../script_vars.sh"
+  filename = "../script_vars.sh"
 
 }

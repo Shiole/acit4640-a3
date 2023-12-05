@@ -1,8 +1,3 @@
-variable "vpc_id" {
-  description = "VPC id"
-  type        = string
-}
-
 variable "db_sg" {
   description = "AWS RDS SG"
   type        = list(string)

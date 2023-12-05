@@ -8,6 +8,11 @@ variable "aws_az" {
   default     = "us-west-2a"
 }
 
+variable "aws_az2" {
+  description = "AWS AZ 2"
+  default     = "us-west-2b"
+}
+
 variable "project_name" {
   description = "Project name"
 }

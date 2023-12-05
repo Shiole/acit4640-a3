@@ -8,6 +8,11 @@ variable "aws_az" {
   type        = string
 }
 
+variable "aws_az2" {
+  description = "AWS AZ 2"
+  type        = string
+}
+
 variable "project_name" {
   description = "Project name"
   type        = string

@@ -62,7 +62,7 @@ resource "aws_subnet" "a03_db1_subnet" {
 resource "aws_subnet" "a03_db2_subnet" {
   vpc_id                  = aws_vpc.a03_vpc.id
   cidr_block              = var.db2_subnet_cidr
-  availability_zone       = var.aws_az
+  availability_zone       = var.aws_az2
   map_public_ip_on_launch = true
   tags = {
     Name    = "a03_db2_subnet"

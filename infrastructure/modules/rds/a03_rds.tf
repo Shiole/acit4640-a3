@@ -1,6 +1,5 @@
 resource "aws_db_subnet_group" "a03_db_subnet" {
   name       = "a03_db_subnet"
-  vpc_id     = var.vpc_id
   subnet_ids = var.subnets
   tags = {
     Name    = var.subnet_tag
@@ -9,7 +8,7 @@ resource "aws_db_subnet_group" "a03_db_subnet" {
 }
 
 resource "aws_db_instance" "a03_rds" {
-  identifier             = "a03_db"
+  identifier             = "database"
   instance_class         = "db.t3.micro"
   allocated_storage      = 5
   db_name                = "mydb"
