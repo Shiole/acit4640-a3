@@ -168,3 +168,8 @@ module "web_ec2" {
   security_group_id = module.web_sg.sg_id
   ssh_key_name      = var.ssh_key_name
 }
+
+module "rds" {
+  source = "./modules/rds"
+  db_sg  = module.vpc.db_subnet_id
+}
