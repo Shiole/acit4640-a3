@@ -1,0 +1,130 @@
+---
+- name: Include var file
+  include_vars: "../../../group_vars/webservers.yml"
+
+- name: Install packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - git
+    - libmysqlclient-dev
+    - pkg-config
+    - python3-dev
+    - python3-pip
+    - python3-pymysql
+  tags: backend
+
+- name: Remove anonymous DB users
+  become: true
+  community.mysql.mysql_user:
+    name: ""
+    host_all: true
+    state: absent
+    login_user: admin
+    login_password: password
+    check_implicit_admin: true
+    login_host: "{{ db_endpoint }}"
+  tags: db
+
+- name: Delete test DB
+  become: true
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+    login_user: admin
+    login_password: password
+    check_implicit_admin: true
+    login_host: "{{ db_endpoint }}"
+  tags: db
+
+- name: Create backend DB
+  become: true
+  community.mysql.mysql_db:
+    name: backend
+    state: present
+    login_user: admin
+    login_password: password
+    check_implicit_admin: true
+    login_host: "{{ db_endpoint }}"
+  tags: db
+
+- name: Create backend DB table and insert data
+  become: true
+  community.mysql.mysql_query:
+    login_db: backend
+    query:
+      - CREATE TABLE IF NOT EXISTS item (name varchar(30) NOT NULL, bcit_id varchar(10) NOT NULL, PRIMARY KEY (bcit_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+      - INSERT INTO item (name, bcit_id) VALUES ('Kitty Low', 'A01273256');
+    login_user: admin
+    login_password: password
+    login_host: "{{ db_endpoint }}"
+  tags: db
+
+# - name: Create DB user a03
+#   become: true
+#   community.mysql.mysql_user:
+#     name: a02
+#     password: password2
+#     host: "%"
+#     priv: "*.*:ALL,GRANT"
+#     state: present
+#     login_user: admin
+#     login_password: password
+#     check_implicit_admin: true
+#     login_host: "{{ db_endpoint }}"
+
+- name: Disallow root login remotely
+  become: true
+  community.mysql.mysql_query:
+    login_db: backend
+    query:
+      - DELETE FROM mysql.user WHERE User='admin' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+    login_user: admin
+    login_password: password
+    login_host: "{{ db_endpoint }}"
+  tags: db
+
+- name: "Create OS user"
+  become: true
+  ansible.builtin.user:
+    name: a03
+    home: /a03
+    shell: /bin/bash
+  tags: backend
+
+- name: "Get backend files"
+  become: true
+  ansible.builtin.copy:
+    src: ./templates/backend
+    dest: /a03/
+    owner: a03
+    force: true
+  tags: backend
+
+- name: Install Python dependency packages
+  become: true
+  pip:
+    requirements: /a03/backend/requirements.txt
+    extra_args: --break-system-packages
+  tags: backend
+
+- name: Transfer backend service file
+  become: true
+  ansible.builtin.copy:
+    src: ./templates/backend.service
+    dest: /etc/systemd/system/backend.service
+    owner: root
+    group: root
+    force: true
+  tags: backend
+
+- name: Start and enable backend service
+  become: true
+  ansible.builtin.service:
+    name: backend
+    state: restarted
+    daemon-reload: true
+    enabled: true
+  tags: backend
