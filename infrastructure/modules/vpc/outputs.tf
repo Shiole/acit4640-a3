@@ -10,6 +10,14 @@ output "web_subnet_id" {
   value = aws_subnet.a03_web_subnet.id
 }
 
+output "db1_subnet_id" {
+  value = aws_subnet.a03_db1_subnet.id
+}
+
+output "db2_subnet_id" {
+  value = aws_subnet.a03_db2_subnet.id
+}
+
 output "a03_gw_id" {
   value = aws_internet_gateway.a03_gw.id
 }

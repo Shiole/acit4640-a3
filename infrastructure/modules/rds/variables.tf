@@ -5,7 +5,7 @@ variable "vpc_id" {
 
 variable "db_sg" {
   description = "AWS RDS SG"
-  type        = string
+  type        = list(string)
 }
 
 variable "subnets" {

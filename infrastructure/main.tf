@@ -175,6 +175,6 @@ module "rds" {
   subnet_tag   = "a03_db_subnet"
   rds_tag      = "a03_rds"
   vpc_id       = var.vpc_cidr
-  db_sg        = module.sg.db_sg.sg_id
-  subnets      = [module.vpc.var.db1_subnet_cidr, module.vpc.var.db2_subnet_cidr]
+  db_sg        = [module.sg.db_sg.sg_id]
+  subnets      = [module.vpc.db1_subnet_id, module.vpc.db2_subnet_id]
 }
