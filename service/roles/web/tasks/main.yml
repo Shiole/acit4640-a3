@@ -1,0 +1,39 @@
+---
+- name: Include Var files
+  include_vars: "../../../group_vars/webservers.yml"
+
+- name: Install Nginx
+  become: true
+  ansible.builtin.package:
+    name: nginx
+    state: latest
+
+- name: Create OS user a02
+  become: true
+  ansible.builtin.user:
+    name: a03
+    home: /a03
+    shell: /bin/bash
+
+- name: Copy over frontend code
+  become: true
+  ansible.builtin.copy:
+    src: ./templates/index.html
+    dest: /usr/share/nginx/html/index.html
+    mode: "777"
+    force: true
+
+- name: Configure nginx
+  become: true
+  ansible.builtin.copy:
+    src: ./templates/default
+    dest: /etc/nginx/sites-available/
+    force: true
+
+- name: Restart and enable nginx
+  become: true
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+    daemon-reload: true
+    enabled: true

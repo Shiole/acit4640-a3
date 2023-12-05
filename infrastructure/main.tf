@@ -225,3 +225,41 @@ EOF
   filename = "../script_vars.sh"
 
 }
+
+resource "local_file" "backend_config" {
+  content = <<EOF
+[database]
+MYSQL_HOST = ${module.rds.rds_endpoint}
+MYSQL_PORT = 3306
+MYSQL_DB = backend
+MYSQL_USER = a02
+MYSQL_PASSWORD = password
+EOF
+
+  filename = "../service/roles/backend/templates/backend/backend.conf"
+}
+
+resource "local_file" "nginx_config" {
+  content = <<EOF
+server {
+        listen        80;
+        server_name   ${module.web_ec2.ec2_pub_dns} "";
+
+        root /usr/share/nginx/html;
+
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+        location /json {
+                proxy_pass http://${module.be_ec2.ec2_priv_ip}:5000;
+        }
+}
+EOF
+
+  filename = "../service/roles/web/templates/default"
+}
