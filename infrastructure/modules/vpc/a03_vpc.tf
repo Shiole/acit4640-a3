@@ -48,16 +48,6 @@ resource "aws_subnet" "a03_web_subnet" {
   }
 }
 
-resource "aws_db_subnet_group" "a03_db_subnet" {
-  name       = "a03_db_subnet"
-  vpc_id     = aws_vpc.a03_vpc.id
-  subnet_ids = [var.db1_subnet_cidr, var.var.db2_subnet_cidr]
-  tags = {
-    Name    = "a03_db_subnet"
-    Project = var.project_name
-  }
-}
-
 resource "aws_internet_gateway" "a03_gw" {
   vpc_id = aws_vpc.a03_vpc.id
   tags = {

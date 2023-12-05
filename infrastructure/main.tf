@@ -170,6 +170,11 @@ module "web_ec2" {
 }
 
 module "rds" {
-  source = "./modules/rds"
-  db_sg  = module.vpc.db_subnet_id
+  source       = "./modules/rds"
+  project_name = var.project_name
+  subnet_tag   = "a03_db_subnet"
+  rds_tag      = "a03_rds"
+  vpc_id       = var.vpc_cidr
+  db_sg        = module.sg.db_sg.sg_id
+  subnets      = [module.vpc.var.db1_subnet_cidr, module.vpc.var.db2_subnet_cidr]
 }
