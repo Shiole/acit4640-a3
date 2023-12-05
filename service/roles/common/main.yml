@@ -1,0 +1,12 @@
+---
+- name: Install general packages for all
+  become: true
+  ansible.builtin.package:
+    update_cache: true
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - bind9-dnsutils
+    - tcpdump
+    - nmap
+    - mysql-client
