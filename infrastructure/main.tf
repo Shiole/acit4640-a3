@@ -178,3 +178,50 @@ module "rds" {
   db_sg        = [module.sg.db_sg.sg_id]
   subnets      = [module.vpc.db1_subnet_id, module.vpc.db2_subnet_id]
 }
+
+resource "local_file" "inventory_file" {
+
+  content = <<EOF
+web:
+  hosts:
+    ${module.web.ec2_instance_public_dns}:
+
+backend:
+  hosts:
+    ${module.be.ec2_instance_public_dns}:
+EOF
+
+  filename = "../../service/inventory/webservers.yml"
+
+}
+
+resource "local_file" "group_vars_file" {
+
+  content = <<EOF
+web_pub_ip: ${module.web.ec2_instance_public_ip}
+backend_pub_ip: ${module.be.ec2_instance_public_ip}
+
+web_pub_dns: ${module.web.ec2_instance_public_dns}
+backend_pub_dns: ${module.be.ec2_instance_public_dns}
+
+web_priv_ip: ${module.web.ec2_instance_private_ip}
+backend_priv_ip: ${module.be.ec2_instance_private_ip}
+
+database_endpoint: ${module.rds.host_address}
+EOF
+
+  filename = "../../service/group_vars/webservers.yml"
+
+}
+
+resource "local_file" "instances" {
+
+  content = <<EOF
+web_id="${module.web.ec2_instance_id}"
+backend_id="${module.be.ec2_instance_id}"
+web_dns="${module.web.ec2_instance_public_dns}"
+EOF
+
+  filename = "../../script_vars.sh"
+
+}
