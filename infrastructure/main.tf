@@ -152,7 +152,7 @@ module "be_ec2" {
   tag_name          = "a03_be"
   aws_region        = var.aws_region
   ami_id            = var.ami_id
-  instance_type     = "t2.micro"
+  instance_type     = var.instance_type
   subnet_id         = module.vpc.be_subnet_id
   security_group_id = module.be_sg.sg_id
   ssh_key_name      = var.ssh_key_name
@@ -164,7 +164,7 @@ module "web_ec2" {
   tag_name          = "a03_web"
   aws_region        = var.aws_region
   ami_id            = var.ami_id
-  instance_type     = "t2.micro"
+  instance_type     = var.instance_type
   subnet_id         = module.vpc.web_subnet_id
   security_group_id = module.web_sg.sg_id
   ssh_key_name      = var.ssh_key_name
@@ -180,8 +180,7 @@ module "rds" {
 }
 
 resource "local_file" "inventory_file" {
-
-  content = <<EOF
+  content  = <<EOF
 web:
   hosts:
     ${module.web_ec2.ec2_pub_dns}
@@ -190,14 +189,11 @@ backend:
   hosts:
     ${module.be_ec2.ec2_pub_dns}
 EOF
-
   filename = "../service/inventory/webservers.yml"
-
 }
 
 resource "local_file" "group_vars_file" {
-
-  content = <<EOF
+  content  = <<EOF
 web_pub_ip: ${module.web_ec2.ec2_pub_ip}
 backend_pub_ip: ${module.be_ec2.ec2_pub_ip}
 
@@ -209,25 +205,23 @@ backend_priv_ip: ${module.be_ec2.ec2_priv_ip}
 
 db_endpoint: ${module.rds.rds_address}
 EOF
-
   filename = "../service/group_vars/webservers.yml"
-
 }
 
 resource "local_file" "instances" {
 
-  content = <<EOF
+  content  = <<EOF
+#!/bin/bash
+
 web_id="${module.web_ec2.ec2_id}"
 backend_id="${module.be_ec2.ec2_id}"
 web_dns="${module.web_ec2.ec2_pub_dns}"
 EOF
-
-  filename = "../script_vars.sh"
-
+  filename = "../instances.sh"
 }
 
 resource "local_file" "backend_config" {
-  content = <<EOF
+  content  = <<EOF
 [database]
 MYSQL_HOST = ${module.rds.rds_address}
 MYSQL_PORT = 3306
@@ -235,12 +229,11 @@ MYSQL_DB = backend
 MYSQL_USER = admin
 MYSQL_PASSWORD = password
 EOF
-
   filename = "../service/roles/backend/templates/backend/backend.conf"
 }
 
 resource "local_file" "nginx_config" {
-  content = <<EOF
+  content  = <<EOF
 server {
         listen        80;
         server_name   ${module.web_ec2.ec2_pub_dns} "";
@@ -260,6 +253,5 @@ server {
         }
 }
 EOF
-
   filename = "../service/roles/web/templates/default"
 }
