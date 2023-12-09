@@ -184,11 +184,11 @@ resource "local_file" "inventory_file" {
   content = <<EOF
 web:
   hosts:
-    ${module.web_ec2.ec2_pub_dns}:
+    ${module.web_ec2.ec2_pub_dns}
 
 backend:
   hosts:
-    ${module.be_ec2.ec2_pub_dns}:
+    ${module.be_ec2.ec2_pub_dns}
 EOF
 
   filename = "../service/inventory/webservers.yml"
@@ -207,7 +207,7 @@ backend_pub_dns: ${module.be_ec2.ec2_pub_dns}
 web_priv_ip: ${module.web_ec2.ec2_priv_ip}
 backend_priv_ip: ${module.be_ec2.ec2_priv_ip}
 
-database_endpoint: ${module.rds.rds_address}
+db_endpoint: ${module.rds.rds_address}
 EOF
 
   filename = "../service/group_vars/webservers.yml"
@@ -229,10 +229,10 @@ EOF
 resource "local_file" "backend_config" {
   content = <<EOF
 [database]
-MYSQL_HOST = ${module.rds.rds_endpoint}
+MYSQL_HOST = ${module.rds.rds_address}
 MYSQL_PORT = 3306
 MYSQL_DB = backend
-MYSQL_USER = a02
+MYSQL_USER = admin
 MYSQL_PASSWORD = password
 EOF
 

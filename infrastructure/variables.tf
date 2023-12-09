@@ -49,7 +49,7 @@ variable "default_route" {
 
 variable "home_net" {
   description = "Home network"
-  default     = "24.80.22.0/24"
+  default     = "24.80.182.0/24"
 }
 
 variable "bcit_net" {

@@ -5,6 +5,7 @@
 - name: Install packages
   become: true
   ansible.builtin.package:
+    update_cache: true
     name: "{{ item }}"
     state: latest
   with_items:
@@ -39,6 +40,16 @@
     login_host: "{{ db_endpoint }}"
   tags: db
 
+- name: Remove backend database if exist
+  community.mysql.mysql_db:
+    name: backend
+    state: absent
+    login_user: admin
+    login_password: password
+    check_implicit_admin: true
+    login_host: "{{ db_endpoint }}"
+  tags: db
+
 - name: Create backend DB
   become: true
   community.mysql.mysql_db:
@@ -65,7 +76,7 @@
 # - name: Create DB user a03
 #   become: true
 #   community.mysql.mysql_user:
-#     name: a02
+#     name: a03
 #     password: password2
 #     host: "%"
 #     priv: "*.*:ALL,GRANT"
@@ -74,6 +85,7 @@
 #     login_password: password
 #     check_implicit_admin: true
 #     login_host: "{{ db_endpoint }}"
+#   tags: db
 
 - name: Disallow root login remotely
   become: true
@@ -86,7 +98,7 @@
     login_host: "{{ db_endpoint }}"
   tags: db
 
-- name: "Create OS user"
+- name: Create OS user a03
   become: true
   ansible.builtin.user:
     name: a03
@@ -94,7 +106,7 @@
     shell: /bin/bash
   tags: backend
 
-- name: "Get backend files"
+- name: Get backend files
   become: true
   ansible.builtin.copy:
     src: ./templates/backend

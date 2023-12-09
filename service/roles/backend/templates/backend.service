@@ -1,11 +1,11 @@
 [Unit]
-Description=Backend a02 Python service
+Description=Backend a03 Python service
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/a02/backend
-User=a02
+WorkingDirectory=/a03/backend
+User=a03
 ExecStart=/usr/local/bin/gunicorn wsgi:app -b 0.0.0.0:5000
 Restart=always
 

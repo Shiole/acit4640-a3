@@ -5,10 +5,11 @@
 - name: Install Nginx
   become: true
   ansible.builtin.package:
+    update_cache: true
     name: nginx
     state: latest
 
-- name: Create OS user a02
+- name: Create OS user a03
   become: true
   ansible.builtin.user:
     name: a03
